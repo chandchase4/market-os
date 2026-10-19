@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 import { connectDatabase, disconnectDatabase } from './db.js'
 import { krakenRouter, startKrakenScanner, stopKrakenScanner } from './data-manager/providers/kraken/routes.js'
 import { okxRouter, stopOkxFeed } from './data-manager/providers/okx/routes.js'
+import { coinbaseRouter, stopCoinbaseFeed } from './data-manager/providers/coinbase/routes.js'
 
 const app = express()
 const port = Number(process.env.PORT || 3001)
@@ -15,6 +16,7 @@ app.use(express.json())
 
 app.use('/api/kraken', krakenRouter)
 app.use('/api/okx', okxRouter)
+app.use('/api/coinbase', coinbaseRouter)
 
 app.use((err, _req, res, _next) => {
   console.error('API error:', err.message)
@@ -47,6 +49,7 @@ try {
     process.once(signal, () => {
       stopKrakenScanner()
       stopOkxFeed()
+      stopCoinbaseFeed()
       server.close(() => {
         void disconnectDatabase().finally(() => process.exit(0))
       })
