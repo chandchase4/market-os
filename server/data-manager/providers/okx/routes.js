@@ -7,7 +7,7 @@ const ticks = new Map()
 let status = 'connecting'
 
 function publish(event, payload) {
-  const frame = 'event: ' + event + '\\n' + 'data: ' + JSON.stringify(payload) + '\\n\\n'
+  const frame = 'event: ' + event + '\n' + 'data: ' + JSON.stringify(payload) + '\n\n'
   for (const res of clients) res.write(frame)
 }
 
@@ -32,9 +32,9 @@ okxRouter.get('/events', (req, res) => {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
   clients.add(res)
-  res.write('event: status\\ndata: ' + JSON.stringify({ status }) + '\\n\\n')
-  for (const tick of ticks.values()) res.write('event: tick\\ndata: ' + JSON.stringify(tick) + '\\n\\n')
-  const heartbeat = setInterval(() => res.write(': heartbeat\\n\\n'), 25000)
+  res.write('event: status\ndata: ' + JSON.stringify({ status }) + '\n\n')
+  for (const tick of ticks.values()) res.write('event: tick\ndata: ' + JSON.stringify(tick) + '\n\n')
+  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 25000)
   req.on('close', () => {
     clearInterval(heartbeat)
     clients.delete(res)
