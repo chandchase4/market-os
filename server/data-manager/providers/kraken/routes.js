@@ -8,7 +8,7 @@ const ticks = new Map()
 let status = 'connecting'
 
 function publish(event, data) {
-  for (const res of clients) res.write('event: ' + event + '\\ndata: ' + JSON.stringify(data) + '\\n\\n')
+  for (const res of clients) res.write('event: ' + event + '\ndata: ' + JSON.stringify(data) + '\n\n')
 }
 
 const feed = new KrakenFeed(
@@ -32,7 +32,7 @@ krakenRouter.get('/items', async (_req, res, next) => {
 krakenRouter.post('/items', async (req, res, next) => {
   try {
     const symbol = String(req.body.symbol || '').trim().toUpperCase()
-    if (!/^[A-Z0-9]+\\/[A-Z0-9]+$/.test(symbol)) return res.status(400).json({ error: 'Use a Kraken spot pair like BTC/USD.' })
+    if (!/^[A-Z0-9]+\/[A-Z0-9]+$/.test(symbol)) return res.status(400).json({ error: 'Use a Kraken spot pair like BTC/USD.' })
     const item = await ScannerItem.create({
       symbol, label: String(req.body.label || '').trim(), note: String(req.body.note || '').trim(), enabled: req.body.enabled !== false
     })
@@ -70,9 +70,9 @@ krakenRouter.get('/events', async (req, res) => {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
   clients.add(res)
-  res.write('event: status\\ndata: ' + JSON.stringify({ status }) + '\\n\\n')
-  for (const tick of ticks.values()) res.write('event: tick\\ndata: ' + JSON.stringify(tick) + '\\n\\n')
-  const heartbeat = setInterval(() => res.write(': heartbeat\\n\\n'), 25000)
+  res.write('event: status\ndata: ' + JSON.stringify({ status }) + '\n\n')
+  for (const tick of ticks.values()) res.write('event: tick\ndata: ' + JSON.stringify(tick) + '\n\n')
+  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 25000)
   req.on('close', () => { clearInterval(heartbeat); clients.delete(res) })
 })
 
