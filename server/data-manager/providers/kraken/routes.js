@@ -64,7 +64,7 @@ krakenRouter.delete('/items/:id', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-krakenRouter.get('/events', async (req, res) => {
+krakenRouter.get('/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache, no-transform')
   res.setHeader('Connection', 'keep-alive')

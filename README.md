@@ -1,33 +1,29 @@
-# Trading Ecosystem V1 — Seven-pillar MVP
+# MarketOS 1.0
 
-A small editable market workspace. **Runs in Codespaces**, not as a database-backed GitHub Pages app.
+Scanner MVP with **Kraken + OKX** live market feeds.
 
-## Seven pillars
-1. **Asset Registry**: shared service for canonical symbol creation and deduplication.
-2. **Asset**: MongoDB records for symbol, name, class, and provider market identifiers.
-3. **Collections**: named sets of saved assets.
-4. **Processes**: saved scanner/discovery configurations (scanner executes; discovery is a disabled placeholder).
-5. **Subscriptions**: connect a Process to a Collection. The central scanner shares upstream feeds.
-6. **Events**: in-memory recent events/alerts, MongoDB-backed optional listener rules (record alert or add an asset to a collection).
-7. **Data Manager**: Coinbase public REST ticker and shared WebSocket feed, plus quotas and ingestion.
+## Run locally
 
-### Setup
+Install dependencies if needed, start MongoDB, then from the repository root:
+
 ```bash
-cd server
 npm install
-cp .env.example .env
-# edit .env to use your MongoDB Atlas URI
+npm install --prefix server
+npm install --prefix client
 npm run dev
 ```
-In a second terminal:
-```bash
-cd client
-npm install
-npm run dev -- --host 0.0.0.0
-```
-Open Codespaces **port 5173** and keep **3001 private**. Vite proxies `/api` to the backend. Do not put your database URI in client files or commit `.env`.
 
-### How to use
-Create Assets → create a Collection → add Assets to it → create a Scanner Process → subscribe it to a Collection → start it. Open Data Manager for live feed status and manual Coinbase ticker pulls. REST pulls for the nine supported crypto symbols can also automatically register assets through the Asset Registry. Incoming prices produce `market.data.received` Events; enabled Event Rules may record an in-app alert or add a known asset to a collection.
+Open http://localhost:5173/
 
-Stock and discovery providers are **not** implemented. Scanner is a basic 5-minute percentage-change filter, not a complete volume/ranking strategy. Recent events, scanner results and quotes live in RAM; catalog and rules persist in MongoDB. Database access requires a running Codespace backend.
+## MVP
+
+- One React Router home route (`/`) displaying the scanner.
+- Kraken pairs: add/remove from the UI; saved in MongoDB through the existing `KrakenScannerItem` model.
+- OKX: BTC-USDT and ETH-USDT (fixed for this MVP).
+- Live ticker updates from backend Server-Sent Events.
+- Sort and filter the combined live market table.
+- Kraken and OKX WebSockets remain on the backend; Coinbase adapter remains in the repository but is not shown in this MVP.
+
+## Notes
+
+MongoDB must be available for the server to start. Kraken's ticker channel is trade-triggered; a row can remain blank until the provider sends a ticker update. OKX volume is base-asset 24h volume. No generic Process Manager, historical scanner results, or asset registry is implemented yet.

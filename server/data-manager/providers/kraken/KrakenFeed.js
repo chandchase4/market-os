@@ -7,7 +7,6 @@ export class KrakenFeed {
     this.onTick = onTick
     this.onStatus = onStatus
     this.symbols = new Set()
-    this.subscribed = new Set()
     this.stopped = false
     this.retry = 0
     this.connect()
@@ -21,11 +20,10 @@ export class KrakenFeed {
     ws.on('open', () => {
       if (this.ws !== ws) return
       this.retry = 0
-      this.subscribed.clear()
       this.onStatus('connected')
       this.send('subscribe', [...this.symbols])
     })
-    ws.on('message', (raw) => {
+    ws.on('message', raw => {
       try {
         const msg = JSON.parse(raw.toString())
         if (msg.channel === 'ticker' && Array.isArray(msg.data)) {
@@ -37,12 +35,11 @@ export class KrakenFeed {
         }
       } catch (err) { console.error('Kraken message error:', err.message) }
     })
-    ws.on('error', (err) => console.error('Kraken connection:', err.message))
+    ws.on('error', err => console.error('Kraken connection:', err.message))
     ws.on('close', () => {
       if (this.ws !== ws || this.stopped) return
       this.onStatus('disconnected')
-      const delay = Math.min(1000 * 2 ** this.retry++, 30000)
-      this.timer = setTimeout(() => this.connect(), delay)
+      this.timer = setTimeout(() => this.connect(), Math.min(1000 * 2 ** this.retry++, 30000))
     })
   }
 
