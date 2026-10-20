@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 import { connectDatabase, disconnectDatabase } from './db.js'
 import { krakenRouter, startKrakenScanner, stopKrakenScanner } from './data-manager/providers/kraken/routes.js'
 import { okxRouter, stopOkxFeed } from './data-manager/providers/okx/routes.js'
+import { assetsRouter } from './domain/assets/routes.js'
 import { coinbaseRouter, stopCoinbaseFeed } from './data-manager/providers/coinbase/routes.js'
 
 const app = express()
@@ -14,13 +15,14 @@ const port = Number(process.env.PORT || 3001)
 app.disable('x-powered-by')
 app.use(express.json())
 
+app.use('/api/assets', assetsRouter)
 app.use('/api/kraken', krakenRouter)
 app.use('/api/okx', okxRouter)
 app.use('/api/coinbase', coinbaseRouter)
 
 app.use((err, _req, res, _next) => {
   console.error('API error:', err.message)
-  res.status(err.code === 11000 ? 409 : err.name === 'ValidationError' || err.name === 'CastError' ? 400 : 500).json({ error: err.code === 11000 ? 'Pair already exists' : err.message })
+  res.status(err.status || (err.code === 11000 ? 409 : err.name === 'ValidationError' || err.name === 'CastError' || err.name === 'VersionError' ? 400 : 500)).json({ error: err.code === 11000 ? 'Pair already exists' : err.message })
 })
 
 // Health check
